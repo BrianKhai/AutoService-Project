@@ -100,6 +100,49 @@ int verify_login(string username, string password, string role);
 
 
 int main() {
+	string Username;
+	string Password;
+	string Role;
+
+	Company carCompany;
+	ifstream manufacturingInventoryIn;
+	ifstream dealershipInventoryIn;
+	ifstream maintenaceInventoryIn;
+
+	ofstream manufacturingInventoryOut;
+	ofstream dealershipInventoryOut;
+	ofstream maintenaceInventoryOut;
+
+
+	do
+	{
+		cout << "Enter Username: ";
+		cin >> Username;
+		cout << "\n";
+		cout << "Enter Password: ";
+		cin >> Password;
+		cout << "\n";
+		cout << "Enter your role: ";
+		cin >> Role;
+		cout << "\n";
+
+
+		if (verify_login(Username, Password, Role) == 1) {
+			cout << "Manufacturing stuff" << endl;
+			carCompany.manufacturing(manufacturingInventoryIn, manufacturingInventoryOut);
+		}
+		if (verify_login(Username, Password, Role) == 2) {
+			cout << "Dealership stuff" << endl;
+		}
+		if (verify_login(Username, Password, Role) == 3) {
+			cout << "Maintenace stuff" << endl;
+		}
+		if (verify_login(Username, Password, Role) == 4) {
+			cout << "Customer stuff" << endl;
+
+		}
+	} while (verify_login(Username, Password, Role) < 1 || verify_login(Username, Password, Role) > 4);
+
 	return 0;
 }
 
@@ -150,19 +193,21 @@ void Company::manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufa
 				while (manufacturingInventoryIn >> count >> date >> item) {
 					cout << setw(20) << count << setw(20) << date << setw(20) << item << endl;
 				}
+			} else {
+				cout << "No database found!" << endl;
 			}
 
 			manufacturingInventoryIn.close();
 		} else if (input == 1) {
 			manufacturingInventoryOut.open(MANUFACTURING_FILE, ios::app);
-			cout << "Adding items" << endl;
+			cout << "Adding items (Do not use spaces)" << endl;
 			cout << "Input stock" << endl;
 			cin >> count;
 			cout << "Input date" << endl;
 			cin >> date;
 			cout << "Input item" << endl;
 			cin >> item;
-			manufacturingInventoryOut << count << " " << date << " " << item;
+			manufacturingInventoryOut << count << " " << date << " " << item << endl;
 			manufacturingInventoryOut.close();
 		} else if (input == 2) {
 			manufacturingInventoryIn.open(MANUFACTURING_FILE);
