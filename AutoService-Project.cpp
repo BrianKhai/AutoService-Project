@@ -1,7 +1,7 @@
-
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -77,87 +77,131 @@ High Level Requirements (WIP):
 ------------------------------------------------------------------------------------------------
 */
 
+const string MANUFACTURING_FILE = "manufacturing_database";
+const string DEALERSHIP_FILE = "manufacturing_database";
+const string MAINTENANCE_FILE = "manufacturing_database";
+
 struct car {
 	string make, model;
 	int vin, liscense;
 };
 
 class Company {
-	void manufacturing();
-	void dealership();
-	void maintenace();
+
+public:
+	void manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut);
+	void dealership(ifstream& dealershipInventoryIn, ofstream& dealershipInventoryOut);
+	void maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceInventoryOut);
 	void customer();
 	void manager(); //grad portion
-};
+} carCompany;
 
+int verify_login(string username, string password, string role);
+
+
+int main() {
+	return 0;
+}
 
 int verify_login(string username, string password, string role) {
 	int verify;
 
-	if (username == "Bob" && password == "ManuFact!2" && role == "Manufacturer") {
+	if (username == "Bob" && password == "123" && role == "M") {
 		verify = 1;
-	}
-	else if (username == "Joe" && password == "pass22" && role == "Dealership") {
+	} else if (username == "Joe" && password == "pass22" && role == "Dealership") {
 		verify = 2;
-	}
-	else if (username == "Hendrick" && password == "Maintain@12" && role == "Maintenance") {
+	} else if (username == "Hendrick" && password == "Maintain@12" && role == "Maintenance") {
 		verify = 3;
-	}
-	else if (username == "Dan" && password == "GimmeACar" && role == "Customer") {
+	} else if (username == "Dan" && password == "GimmeACar" && role == "Customer") {
 		verify = 4;
-	}
-	else {
+	} else {
 		verify = 0;
 	}
 
 	return verify;
 }
 
-int main() {
-	string Username;
-	string Password;
-	string Role;
+/*
+		Cars
+		Parts		(Engine components)
+		Materials	(Glass, bolts, chairs, steel)
+		Show supplier
+*/
 
-	Company carCompany;
+void Company::manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut) {
 
-	ofstream manufacturingInventory;
-	ofstream dealershipInventory;
-	ofstream maintenaceInventory;
+	int count;
+	int date;
+	string item;
 
-	manufacturingInventory.open("manufacturing_database");
-	dealershipInventory.open("dealership_database");
-	maintenaceInventory.open("maintenace_database");
+	int input = 0;
+	while (true) {
+		cout << "[0] Display" << endl;
+		cout << "[1] Add" << endl;
+		cout << "[2] Search" << endl;
+		cin >> input;
 
-	do
-	{
-		cout << "Enter Username: ";
-		cin >> Username;
-		cout << "\n";
-		cout << "Enter Password: ";
-		cin >> Password;
-		cout << "\n";
-		cout << "Enter your role: ";
-		cin >> Role;
-		cout << "\n";
+		if (input == 0) {
+			manufacturingInventoryIn.open(MANUFACTURING_FILE);
 
+			cout << "Display items" << endl;
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Count" << setw(20) << "Date" << setw(20) << "Item" << endl;
+				while (manufacturingInventoryIn >> count >> date >> item) {
+					cout << setw(20) << count << setw(20) << date << setw(20) << item << endl;
+				}
+			}
 
-		if (verify_login(Username, Password, Role) == 1) {
-			cout << "Manufacturing stuff";
+			manufacturingInventoryIn.close();
+		} else if (input == 1) {
+			manufacturingInventoryOut.open(MANUFACTURING_FILE, ios::app);
+			cout << "Adding items" << endl;
+			cout << "Input stock" << endl;
+			cin >> count;
+			cout << "Input date" << endl;
+			cin >> date;
+			cout << "Input item" << endl;
+			cin >> item;
+			manufacturingInventoryOut << count << " " << date << " " << item;
+			manufacturingInventoryOut.close();
+		} else if (input == 2) {
+			manufacturingInventoryIn.open(MANUFACTURING_FILE);
+			string search;
+			cout << "Searching for items" << endl;
+			cout << "Item name:" << endl;
+			cin >> search;
+
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Count" << setw(20) << "Date" << setw(20) << "Item" << endl;
+				while (manufacturingInventoryIn >> count >> date >> item) {
+					if (item == search) {
+						cout << setw(20) << count << setw(20) << date << setw(20) << item << endl;
+					}
+				}
+			}
+			manufacturingInventoryIn.close();
 		}
-		if (verify_login(Username, Password, Role) == 2) {
-			cout << "Dealership stuff";
-		}
-		if (verify_login(Username, Password, Role) == 3) {
-			cout << "Maintenace stuff";
-		}
-		if (verify_login(Username, Password, Role) == 4) {
-			cout << "Customer stuff";
+	}
 
-		}
-	} while (verify_login(Username, Password, Role) < 1 || verify_login(Username, Password, Role) > 4);
 
-	manufacturingInventory.close();
-	dealershipInventory.close();
-	maintenaceInventory.close();
-	return 0;
+}
+
+void Company::dealership(ifstream& dealershipInventoryIn, ofstream& dealershipInventoryOut) {
+	dealershipInventoryOut.open(DEALERSHIP_FILE);
+
+	dealershipInventoryOut.close();
+}
+
+void Company::maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceInventoryOut) {
+	maintenaceInventoryOut.open(MAINTENANCE_FILE);
+
+	maintenaceInventoryOut.close();
+}
+
+void Company::customer() {
+
+}
+
+void Company::manager() {
+
 }
