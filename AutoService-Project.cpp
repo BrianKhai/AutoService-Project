@@ -71,6 +71,10 @@ High Level Requirements (WIP):
 	* Customers need a way to order new and used cars directly from the car manufacturer
 		~ Show diferent dealerships with different cars?
 			- Give them locations?
+	
+	
+	
+	GRAD Portion
 	* Customers want manager to show cost of all parts, as well as, show profit to customers and repair/auto shops
 		~ Show parts and cost
 		~ Show profits
@@ -92,8 +96,9 @@ public:
 	void manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut);
 	void dealership(ifstream& dealershipInventoryIn, ofstream& dealershipInventoryOut);
 	void maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceInventoryOut);
-	void customer();
+	void customer(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut);
 	void manager(); //grad portion
+
 } carCompany;
 
 int verify_login(string username, string password, string role);
@@ -157,6 +162,8 @@ int verify_login(string username, string password, string role) {
 		verify = 3;
 	} else if (username == "Dan" && password == "GimmeACar" && role == "Customer") {
 		verify = 4;
+	} else if (username == "ManagerMan" && password == "Moneyheh" && role == "Manager"){
+		verify = 5;
 	} else {
 		verify = 0;
 	}
@@ -243,10 +250,75 @@ void Company::maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceIn
 	maintenaceInventoryOut.close();
 }
 
-void Company::customer() {
-
+void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut) {
+	int year;
+	int choice;
+	string make;
+	string model;
+	string color;
+	
+	while (true) {
+		// ask customer to choose if they want a new or used car
+		cout << "What type of condition do you want your car?" << endl;	
+		cout << "[0] New" << endl;
+		cout << "[1] Used" << endl;
+		cin >> choice;
+		
+		if (choice == 0) {
+			manufacturingInventoryIn.open(MANUFACTURING_FILE);
+			
+			// get desired car from customer (year, make, model, color)
+			cout << endl << "Enter desired year: ";
+			cin >> year;
+			cout << endl << " Enter desired make: ";
+			cin >> make;
+			cout << endl << "Enter desired model: ";
+			cin >> model;
+			cout << endl << "Enter desired color: ";
+			cin >> color;
+			
+			// use inputs to search for matching values and display
+			
+			// look up how to search for specific set of values
+			
+			
+			
+			
+		} else if (choice == 1) {
+			
+			// get desired car from customer (year, make, model, color)
+			cout << endl << "Enter desired year: ";
+			cin >> year;
+			cout << endl << " Enter desired make: ";
+			cin >> make;
+			cout << endl << "Enter desired model: ";
+			cin >> model;
+			cout << endl << "Enter desired color: ";
+			cin >> color;
+			
+			// use inputs to search for matching values and display
+			
+			// look up how to search for specific set of values
+			
+			
+			
+		} else {
+			cout << "Invalid input." << endl;	
+		}
+		
+		
+	}
+	
+	
+	// considering using bool
+	// if bool is true, ask customer if they want one ordered and shipped to nearby dealership
+	// otherwise, bool is false, and states out of stock
+	
+	
+	
+	manufacturingInventoryIn.close();
 }
 
 void Company::manager() {
-
+	// Grad Portion
 }
