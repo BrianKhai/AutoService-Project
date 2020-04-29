@@ -154,7 +154,7 @@ int main() {
 int verify_login(string username, string password, string role) {
 	int verify;
 
-	if (username == "Bob" && password == "123" && role == "M") {
+	if (username == "Bob" && password == "123" && role == "Manufacture") {
 		verify = 1;
 	} else if (username == "Joe" && password == "pass22" && role == "Dealership") {
 		verify = 2;
@@ -270,7 +270,7 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 			// get desired car from customer (year, make, model, color)
 			cout << endl << "Enter desired year: ";
 			cin >> year;
-			cout << endl << " Enter desired make: ";
+			cout << endl << "Enter desired make: ";
 			cin >> make;
 			cout << endl << "Enter desired model: ";
 			cin >> model;
@@ -281,15 +281,20 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 			
 			// look up how to search for specific set of values
 			
+			// considering using bool
+			// if bool is true, ask customer if they want one ordered and shipped to nearby dealership
+			// otherwise, bool is false, and states out of stock
 			
 			
+			manufacturingInventoryIn.close();
 			
 		} else if (choice == 1) {
+			manufacturingInventoryIn.open(MANUFACTURING_FILE);
 			
 			// get desired car from customer (year, make, model, color)
 			cout << endl << "Enter desired year: ";
 			cin >> year;
-			cout << endl << " Enter desired make: ";
+			cout << endl << "Enter desired make: ";
 			cin >> make;
 			cout << endl << "Enter desired model: ";
 			cin >> model;
@@ -301,22 +306,20 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 			// look up how to search for specific set of values
 			
 			
+			// considering using bool
+			// if bool is true, ask customer if they want one ordered and shipped to nearby dealership
+			// otherwise, bool is false, and states out of stock
+			
+			
+			manufacturingInventoryIn.close();
 			
 		} else {
 			cout << "Invalid input." << endl;	
 		}
 		
 		
-	}
+	}	
 	
-	
-	// considering using bool
-	// if bool is true, ask customer if they want one ordered and shipped to nearby dealership
-	// otherwise, bool is false, and states out of stock
-	
-	
-	
-	manufacturingInventoryIn.close();
 }
 
 void Company::manager() {
