@@ -69,7 +69,7 @@ High Level Requirements (WIP):
 		~ Show inventory
 		~ Show status of item
 	* Customers need a way to order new and used cars directly from the car manufacturer
-		~ Show diferent dealerships with different cars?
+		~ Show different dealerships with different cars?
 			- Give them locations?
 	
 	
@@ -256,6 +256,14 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 	string make;
 	string model;
 	string color;
+	string ship;
+	
+	//for file read
+	string itemYr;
+	string itemMk;
+	string itemMo;
+	string itemCo;
+	string itemCh;
 	
 	while (true) {
 		// ask customer to choose if they want a new or used car
@@ -264,8 +272,11 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 		cout << "[1] Used" << endl;
 		cin >> choice;
 		
+
+		
 		if (choice == 0) {
 			manufacturingInventoryIn.open(MANUFACTURING_FILE);
+			itemCh = "New";
 			
 			// get desired car from customer (year, make, model, color)
 			cout << endl << "Enter desired year: ";
@@ -278,18 +289,32 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 			cin >> color;
 			
 			// use inputs to search for matching values and display
-			
-			// look up how to search for specific set of values
-			
-			// considering using bool
-			// if bool is true, ask customer if they want one ordered and shipped to nearby dealership
-			// otherwise, bool is false, and states out of stock
-			
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << setw(20) << "Year" << endl;
+				while (manufacturingInventoryIn >> make >> model >> color >> year) {
+					if (itemMk == make && itemMo == model && itemCo == color && itemYr == year && itemCh == "New") {
+						cout << setw(20) << make << setw(20) << model << setw(20) << color << setw(20) << year << endl;
+						cout << "Would you like to get this vehicle shipped to a dealership near you?" << endl;
+						cout << "[Y] Yes" << endl;
+						cout << "[N] No" << endl;
+						cin >> ship;
+						if (ship == Y || ship == y || ship == Yes || ship == yes) {
+							cout << "Congratulations! Your vehicle will arrive to your closest dealership in a couple of days!" <<endl;
+						} else if (ship == N || ship == n || ship == No || ship == no) {
+							//assuming they knew the car they wanted but dont want anymore
+							cout << "Thank you for your time." << endl;
+						} else {
+							cout << "Invalid response." << endl;
+						}
+					}
+				}
+			}
 			
 			manufacturingInventoryIn.close();
 			
 		} else if (choice == 1) {
 			manufacturingInventoryIn.open(MANUFACTURING_FILE);
+			itemCh = "Used";
 			
 			// get desired car from customer (year, make, model, color)
 			cout << endl << "Enter desired year: ";
@@ -303,13 +328,25 @@ void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturi
 			
 			// use inputs to search for matching values and display
 			
-			// look up how to search for specific set of values
-			
-			
-			// considering using bool
-			// if bool is true, ask customer if they want one ordered and shipped to nearby dealership
-			// otherwise, bool is false, and states out of stock
-			
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << setw(20) << "Year" << endl;
+				while (manufacturingInventoryIn >> make >> model >> color >> year) {
+					if (itemMk == make && itemMo == model && itemCo == color && itemYr == year && itemCh == "Used") {
+						cout << setw(20) << make << setw(20) << model << setw(20) << color << setw(20) << year << endl;
+						cout << "[Y] Yes" << endl;
+						cout << "[N] No" << endl;
+						cin >> ship;
+						if (ship == Y || ship == y || ship == Yes || ship == yes) {
+							cout << "Congratulations! Your vehicle will arrive to your closest dealership in a couple of days!" <<endl;
+						} else if (ship == N || ship == n || ship == No || ship == no) {
+							//assuming they knew the car they wanted but dont want anymore
+							cout << "Thank you for your time." << endl;
+						} else {
+							cout << "Invalid response." << endl;
+						}
+					}
+				}
+			}
 			
 			manufacturingInventoryIn.close();
 			
