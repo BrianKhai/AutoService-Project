@@ -69,12 +69,8 @@ High Level Requirements (WIP):
 		~ Show inventory
 		~ Show status of item
 	* Customers need a way to order new and used cars directly from the car manufacturer
-		~ Show different dealerships with different cars?
+		~ Show diferent dealerships with different cars?
 			- Give them locations?
-	
-	
-	
-	GRAD Portion
 	* Customers want manager to show cost of all parts, as well as, show profit to customers and repair/auto shops
 		~ Show parts and cost
 		~ Show profits
@@ -96,65 +92,21 @@ public:
 	void manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut);
 	void dealership(ifstream& dealershipInventoryIn, ofstream& dealershipInventoryOut);
 	void maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceInventoryOut);
-	void customer(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut);
+	void customer();
 	void manager(); //grad portion
-
 } carCompany;
 
 int verify_login(string username, string password, string role);
 
 
 int main() {
-	string Username;
-	string Password;
-	string Role;
-
-	Company carCompany;
-	ifstream manufacturingInventoryIn;
-	ifstream dealershipInventoryIn;
-	ifstream maintenaceInventoryIn;
-
-	ofstream manufacturingInventoryOut;
-	ofstream dealershipInventoryOut;
-	ofstream maintenaceInventoryOut;
-
-
-	do
-	{
-		cout << "Enter Username: ";
-		cin >> Username;
-		cout << "\n";
-		cout << "Enter Password: ";
-		cin >> Password;
-		cout << "\n";
-		cout << "Enter your role: ";
-		cin >> Role;
-		cout << "\n";
-
-
-		if (verify_login(Username, Password, Role) == 1) {
-			cout << "Manufacturing stuff" << endl;
-			carCompany.manufacturing(manufacturingInventoryIn, manufacturingInventoryOut);
-		}
-		if (verify_login(Username, Password, Role) == 2) {
-			cout << "Dealership stuff" << endl;
-		}
-		if (verify_login(Username, Password, Role) == 3) {
-			cout << "Maintenace stuff" << endl;
-		}
-		if (verify_login(Username, Password, Role) == 4) {
-			cout << "Customer stuff" << endl;
-
-		}
-	} while (verify_login(Username, Password, Role) < 1 || verify_login(Username, Password, Role) > 4);
-
 	return 0;
 }
 
 int verify_login(string username, string password, string role) {
 	int verify;
 
-	if (username == "Bob" && password == "123" && role == "Manufacture") {
+	if (username == "Bob" && password == "123" && role == "M") {
 		verify = 1;
 	} else if (username == "Joe" && password == "pass22" && role == "Dealership") {
 		verify = 2;
@@ -162,8 +114,6 @@ int verify_login(string username, string password, string role) {
 		verify = 3;
 	} else if (username == "Dan" && password == "GimmeACar" && role == "Customer") {
 		verify = 4;
-	} else if (username == "ManagerMan" && password == "Moneyheh" && role == "Manager"){
-		verify = 5;
 	} else {
 		verify = 0;
 	}
@@ -200,21 +150,19 @@ void Company::manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufa
 				while (manufacturingInventoryIn >> count >> date >> item) {
 					cout << setw(20) << count << setw(20) << date << setw(20) << item << endl;
 				}
-			} else {
-				cout << "No database found!" << endl;
 			}
 
 			manufacturingInventoryIn.close();
 		} else if (input == 1) {
 			manufacturingInventoryOut.open(MANUFACTURING_FILE, ios::app);
-			cout << "Adding items (Do not use spaces)" << endl;
+			cout << "Adding items" << endl;
 			cout << "Input stock" << endl;
 			cin >> count;
 			cout << "Input date" << endl;
 			cin >> date;
 			cout << "Input item" << endl;
 			cin >> item;
-			manufacturingInventoryOut << count << " " << date << " " << item << endl;
+			manufacturingInventoryOut << count << " " << date << " " << item;
 			manufacturingInventoryOut.close();
 		} else if (input == 2) {
 			manufacturingInventoryIn.open(MANUFACTURING_FILE);
@@ -250,115 +198,10 @@ void Company::maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceIn
 	maintenaceInventoryOut.close();
 }
 
-void Company::customer(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut) {
-	int year;
-	int choice;
-	string make;
-	string model;
-	string color;
-	string ship;
-	
-	//for file read
-	string itemYr;
-	string itemMk;
-	string itemMo;
-	string itemCo;
-	string itemCh;
-	
-	while (true) {
-		// ask customer to choose if they want a new or used car
-		cout << "What type of condition do you want your car?" << endl;	
-		cout << "[0] New" << endl;
-		cout << "[1] Used" << endl;
-		cin >> choice;
-		
+void Company::customer() {
 
-		
-		if (choice == 0) {
-			manufacturingInventoryIn.open(MANUFACTURING_FILE);
-			itemCh = "New";
-			
-			// get desired car from customer (year, make, model, color)
-			cout << endl << "Enter desired year: ";
-			cin >> year;
-			cout << endl << "Enter desired make: ";
-			cin >> make;
-			cout << endl << "Enter desired model: ";
-			cin >> model;
-			cout << endl << "Enter desired color: ";
-			cin >> color;
-			
-			// use inputs to search for matching values and display
-			if (manufacturingInventoryIn.is_open()) {
-				cout << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << setw(20) << "Year" << endl;
-				while (manufacturingInventoryIn >> make >> model >> color >> year) {
-					if (itemMk == make && itemMo == model && itemCo == color && itemYr == year && itemCh == "New") {
-						cout << setw(20) << make << setw(20) << model << setw(20) << color << setw(20) << year << endl;
-						cout << "Would you like to get this vehicle shipped to a dealership near you?" << endl;
-						cout << "[Y] Yes" << endl;
-						cout << "[N] No" << endl;
-						cin >> ship;
-						if (ship == Y || ship == y || ship == Yes || ship == yes) {
-							cout << "Congratulations! Your vehicle will arrive to your closest dealership in a couple of days!" <<endl;
-						} else if (ship == N || ship == n || ship == No || ship == no) {
-							//assuming they knew the car they wanted but dont want anymore
-							cout << "Thank you for your time." << endl;
-						} else {
-							cout << "Invalid response." << endl;
-						}
-					}
-				}
-			}
-			
-			manufacturingInventoryIn.close();
-			
-		} else if (choice == 1) {
-			manufacturingInventoryIn.open(MANUFACTURING_FILE);
-			itemCh = "Used";
-			
-			// get desired car from customer (year, make, model, color)
-			cout << endl << "Enter desired year: ";
-			cin >> year;
-			cout << endl << "Enter desired make: ";
-			cin >> make;
-			cout << endl << "Enter desired model: ";
-			cin >> model;
-			cout << endl << "Enter desired color: ";
-			cin >> color;
-			
-			// use inputs to search for matching values and display
-			
-			if (manufacturingInventoryIn.is_open()) {
-				cout << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << setw(20) << "Year" << endl;
-				while (manufacturingInventoryIn >> make >> model >> color >> year) {
-					if (itemMk == make && itemMo == model && itemCo == color && itemYr == year && itemCh == "Used") {
-						cout << setw(20) << make << setw(20) << model << setw(20) << color << setw(20) << year << endl;
-						cout << "[Y] Yes" << endl;
-						cout << "[N] No" << endl;
-						cin >> ship;
-						if (ship == Y || ship == y || ship == Yes || ship == yes) {
-							cout << "Congratulations! Your vehicle will arrive to your closest dealership in a couple of days!" <<endl;
-						} else if (ship == N || ship == n || ship == No || ship == no) {
-							//assuming they knew the car they wanted but dont want anymore
-							cout << "Thank you for your time." << endl;
-						} else {
-							cout << "Invalid response." << endl;
-						}
-					}
-				}
-			}
-			
-			manufacturingInventoryIn.close();
-			
-		} else {
-			cout << "Invalid input." << endl;	
-		}
-		
-		
-	}	
-	
 }
 
 void Company::manager() {
-	// Grad Portion
+
 }
