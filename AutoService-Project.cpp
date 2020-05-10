@@ -2,19 +2,14 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include <ctime>
 
 using namespace std;
 
 /*
-(If your team is not familiar with creating a GUI or using databases, you can use the C++ text
-based interface and files to handles your input and output.  Do not leave any team members
-behind by choosing a solution that is beyond their skillset.)
-Your company has been hired by a large car manufacturer to develop software to handle various
-processes in their business.  There are currently five different car models with 3 variations of
-each model with future cars designs being developed.  The car manufacturer wants a full stack
-software solution for the following needs:
-The manufacturing facilities (the plants that build the cars) are losing track of parts and
-materials and need a software tool to track all the car parts and materials (e.g. glass, bolts,
+
+
+terials and need a software tool to track all the car parts and materials (e.g. glass, bolts,
 chairs, steel) that have been purchased and received from suppliers.  They may have over 100
 different suppliers.
 Car dealerships need new software to order new cars from the car manufacturer. The dealerships
@@ -69,29 +64,39 @@ High Level Requirements (WIP):
 		~ Show inventory
 		~ Show status of item
 	* Customers need a way to order new and used cars directly from the car manufacturer
-		~ Show diferent dealerships with different cars?
+		~ Show different dealerships with different cars?
 			- Give them locations?
+
+
+
+	GRAD Portion
 	* Customers want manager to show cost of all parts, as well as, show profit to customers and repair/auto shops
 		~ Show parts and cost
 		~ Show profits
 ------------------------------------------------------------------------------------------------
 */
 
-const string MANUFACTURING_FILE = "manufacturing_database";
+const string MAN_CAR_FILE = "manufacturing_car_database";
+const string MAN_MAT_FILE = "manufacturing_mat_database";
+const string MAN_PART_FILE = "manufacturing_part_database";
+const string MAN_SUP_FILE = "manufacturing_sup_database";
+
 const string DEALERSHIP_FILE = "manufacturing_database";
 const string MAINTENANCE_FILE = "manufacturing_database";
 
-struct car {
-	string make, model;
-	int vin, liscense;
-};
-
 class Company {
+	ifstream manufacturingInventoryIn;
+	ifstream dealershipInventoryIn;
+	ifstream maintenaceInventoryIn;
 
+	ofstream manufacturingInventoryOut;
+	ofstream dealershipInventoryOut;
+	ofstream maintenaceInventoryOut;
+	ofstream tempOut;
 public:
-	void manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut);
-	void dealership(ifstream& dealershipInventoryIn, ofstream& dealershipInventoryOut);
-	void maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceInventoryOut);
+	void manufacturing();
+	void dealership();
+	void maintenace();
 	void customer();
 	void manager(); //grad portion
 } carCompany;
@@ -100,6 +105,39 @@ int verify_login(string username, string password, string role);
 
 
 int main() {
+	string Username;
+	string Password;
+	string Role;
+
+
+	do
+	{
+		cout << "Enter Username: ";
+		cin >> Username;
+		cout << "\n";
+		cout << "Enter Password: ";
+		cin >> Password;
+		cout << "\n";
+		cout << "Enter your role: ";
+		cin >> Role;
+		cout << "\n";
+
+
+		if (verify_login(Username, Password, Role) == 1) {
+			carCompany.manufacturing();
+		}
+		if (verify_login(Username, Password, Role) == 2) {
+			cout << "Dealership stuff" << endl;
+		}
+		if (verify_login(Username, Password, Role) == 3) {
+			cout << "Maintenace stuff" << endl;
+		}
+		if (verify_login(Username, Password, Role) == 4) {
+			cout << "Customer stuff" << endl;
+			carCompany.customer();
+		}
+	} while (verify_login(Username, Password, Role) < 1 || verify_login(Username, Password, Role) > 4);
+
 	return 0;
 }
 
@@ -114,10 +152,11 @@ int verify_login(string username, string password, string role) {
 		verify = 3;
 	} else if (username == "Dan" && password == "GimmeACar" && role == "Customer") {
 		verify = 4;
+	} else if (username == "ManagerMan" && password == "Moneyheh" && role == "Manager") {
+		verify = 5;
 	} else {
 		verify = 0;
 	}
-
 	return verify;
 }
 
@@ -128,80 +167,447 @@ int verify_login(string username, string password, string role) {
 		Show supplier
 */
 
-void Company::manufacturing(ifstream& manufacturingInventoryIn, ofstream& manufacturingInventoryOut) {
-
-	int count;
-	int date;
-	string item;
-
+void Company::manufacturing() {
 	int input = 0;
-	while (true) {
-		cout << "[0] Display" << endl;
-		cout << "[1] Add" << endl;
-		cout << "[2] Search" << endl;
-		cin >> input;
+	int carInput = 0;
+	int partInput = 0;
+	int matInput = 0;
+	int supInput = 0;
+
+	// Current date stuff
+	char buffer[80];
+	time_t t = time(0);
+	struct tm timeinfo;
+	localtime_s(&timeinfo, &t);
+
+	strftime(buffer, sizeof(buffer), "%d-%m-%Y|%H:%M:%S", &timeinfo);	// Date Format
+	string date = buffer;
+
+	while (input != 4) {
+		do {
+			cout << "Manufacturing Main Menu" << endl;
+			cout << "[0] Cars" << endl;
+			cout << "[1] Parts" << endl;
+			cout << "[2] Materials" << endl;
+			cout << "[3] Show Supplier" << endl;
+			cout << "[4] Exit" << endl;
+			cin >> input;
+			system("CLS");
+		} while (input < 0 || input > 4);
 
 		if (input == 0) {
-			manufacturingInventoryIn.open(MANUFACTURING_FILE);
+			string stock, year, make, model, color, srchMake, srchModel;
 
-			cout << "Display items" << endl;
+
+			//Display cars/////
+			manufacturingInventoryIn.open(MAN_CAR_FILE);
 			if (manufacturingInventoryIn.is_open()) {
-				cout << setw(20) << "Count" << setw(20) << "Date" << setw(20) << "Item" << endl;
-				while (manufacturingInventoryIn >> count >> date >> item) {
-					cout << setw(20) << count << setw(20) << date << setw(20) << item << endl;
+				cout << setw(20) << "Last Updated" << setw(20) << "Stock" << setw(20) << "Year" << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << endl;
+				while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color) {
+					cout << setw(20) << date << setw(20) << stock << setw(20) << year << setw(20) << make << setw(20) << model << setw(20) << color << endl;
 				}
+			} else {
+				cout << "Error opening " << MAN_CAR_FILE << endl;
 			}
-
 			manufacturingInventoryIn.close();
-		} else if (input == 1) {
-			manufacturingInventoryOut.open(MANUFACTURING_FILE, ios::app);
-			cout << "Adding items" << endl;
-			cout << "Input stock" << endl;
-			cin >> count;
-			cout << "Input date" << endl;
-			cin >> date;
-			cout << "Input item" << endl;
-			cin >> item;
-			manufacturingInventoryOut << count << " " << date << " " << item;
-			manufacturingInventoryOut.close();
-		} else if (input == 2) {
-			manufacturingInventoryIn.open(MANUFACTURING_FILE);
-			string search;
-			cout << "Searching for items" << endl;
-			cout << "Item name:" << endl;
-			cin >> search;
+			//////////////////
 
-			if (manufacturingInventoryIn.is_open()) {
-				cout << setw(20) << "Count" << setw(20) << "Date" << setw(20) << "Item" << endl;
-				while (manufacturingInventoryIn >> count >> date >> item) {
-					if (item == search) {
-						cout << setw(20) << count << setw(20) << date << setw(20) << item << endl;
+			while (carInput != 3) {
+
+				// Cars Submenu
+				do {
+					cout << "Cars Submenu" << endl << endl;
+					cout << "[0] Add New Cars" << endl;
+					cout << "[1] Search" << endl;
+					cout << "[2] Update Stock" << endl;
+					cout << "[3] Return" << endl;
+					cin >> carInput;
+					system("CLS");
+				} while (carInput < 0 || carInput > 3);
+
+				// Cars submenu
+				if (carInput == 0) {										// Add new car
+					cout << "Year: ";
+					cin >> year;
+					cout << "Make: ";
+					cin >> make;
+					cout << "Model: ";
+					cin >> model;
+					cout << "Available colors: ";
+					cin >> color;
+					cout << "Stock: ";
+					cin >> stock;
+
+					manufacturingInventoryOut.open(MAN_CAR_FILE, ios::app);
+					manufacturingInventoryOut << date << " " << stock << " " << year << " " << make << " " << model << " " << color << endl;
+					manufacturingInventoryOut.close();
+					cout << "Car added" << endl << endl << endl;
+				} else if (carInput == 1) {								// Search for car
+					bool isFound = false;
+					cout << "Make: ";
+					cin >> srchMake;
+					cout << "Model: ";
+					cin >> srchModel;
+
+					manufacturingInventoryIn.open(MAN_CAR_FILE);
+					if (manufacturingInventoryIn.is_open()) {
+						while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color) {
+							if (srchMake == make || srchModel == model) {
+								isFound = true;
+								cout << setw(20) << "Last Updated" << setw(20) << "Stock" << setw(20) << "Year" << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << endl;
+								cout << setw(20) << date << setw(20) << stock << setw(20) << year << setw(20) << make << setw(20) << model << setw(20) << color << endl << endl << endl;
+							}
+						}
+					} else {
+						cout << "Error opening " << MAN_CAR_FILE << endl;
+					}
+					if (!isFound) {
+						cout << "Item could not be found!" << endl << endl << endl;
+					}
+					manufacturingInventoryIn.close();
+				} else if (carInput == 2) {										// Update car database
+					cout << "Give a Make and Model to update" << endl;
+					cout << "Make: ";
+					cin >> srchMake;
+					cout << "Model: ";
+					cin >> srchModel;
+
+					tempOut.open("temp_file");
+					manufacturingInventoryIn.open(MAN_CAR_FILE);
+					if (manufacturingInventoryIn.is_open()) {
+						bool isFound = false;
+						bool keepEntry = true;
+						while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color) {
+							if (srchMake == make && srchModel == model) {
+								isFound = true;
+								cout << "New Stock: ";
+								cin >> stock;
+								if (stoi(stock) == 0) {
+									string userDelResponse;
+									cout << "Would you like to delete this item form the database? (Yes, y)" << endl;
+									cin >> userDelResponse;
+
+									if (userDelResponse == "Yes" || userDelResponse == "Y" || userDelResponse == "yes" || userDelResponse == "y") {
+										cout << make << " " << model << " deleted" << endl;
+										keepEntry = false;
+									}
+								}
+							}
+							if (keepEntry) {
+								tempOut << date << " " << stock << " " << year << " " << make << " " << model << " " << color << endl;
+							} else {
+								keepEntry = true;
+							}
+						}
+						if (!isFound) {
+							cout << "Item could not be found!" << endl;
+						}
+					}
+
+					tempOut.close();
+					manufacturingInventoryIn.close();
+					if (remove("manufacturing_car_database")) {
+						cout << "Error deleting file" << endl;
+					} else {
+						cout << "File successfully deleted" << endl;
+					}
+
+					if (rename("temp_file", "manufacturing_car_database")) {
+						cout << "Error renaming file" << endl;
+					} else {
+						cout << "File successfully renamed" << endl;
 					}
 				}
 			}
+		} else if (input == 1) {							// Part submenu
+			string stock, part, srch;
+
+			// Display database
+			manufacturingInventoryIn.open(MAN_PART_FILE);
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Last Updated" << setw(20) << "Stock" << setw(20) << "Part" << endl;
+				while (manufacturingInventoryIn >> date >> stock >> part) {
+					cout << setw(20) << date << setw(20) << stock << setw(20) << part << endl;
+				}
+			} else {
+				cout << "Error opening " << MAN_PART_FILE << endl;
+			}
 			manufacturingInventoryIn.close();
+
+			while (partInput != 3) {
+				do {
+					cout << "Parts Submenu" << endl;
+					cout << "[0] Add Parts" << endl;
+					cout << "[1] Search Parts" << endl;
+					cout << "[2] Update Stock" << endl;
+					cout << "[3] Return" << endl;
+					cin >> partInput;
+					system("CLS");
+				} while (partInput < 0 || partInput > 3);
+				// Stuff
+
+				if (partInput == 0) {					// Add Parts
+					cout << "Part name";
+					cin >> part;
+					cout << "Stock: ";
+					cin >> stock;
+
+					manufacturingInventoryOut.open(MAN_PART_FILE, ios::app);
+					manufacturingInventoryOut << date << " " << stock << " " << part << endl;
+					manufacturingInventoryOut.close();
+					cout << "Part added" << endl << endl << endl;
+				} else if (partInput == 1) {			// Search Parts
+					bool isFound = false;
+					cout << "Part name: ";
+					cin >> srch;
+
+					manufacturingInventoryIn.open(MAN_PART_FILE);
+					if (manufacturingInventoryIn.is_open()) {
+						while (manufacturingInventoryIn >> date >> stock >> part) {
+							if (srch == part) {
+								isFound = true;
+								cout << setw(20) << "Last Updated" << setw(20) << "Stock" << setw(20) << "Part" << endl;
+								cout << setw(20) << date << setw(20) << stock << setw(20) << part << endl << endl << endl;
+							}
+						}
+					} else {
+						cout << "Error opening " << MAN_CAR_FILE << endl;
+					}
+					if (!isFound) {
+						cout << "Item could not be found!" << endl << endl << endl;
+					}
+					manufacturingInventoryIn.close();
+				} else if (partInput == 2) {
+					cout << "Give a Part to update" << endl;
+					cout << srch;
+					tempOut.open("temp_file");
+					manufacturingInventoryIn.open(MAN_PART_FILE);
+					if (manufacturingInventoryIn.is_open()) {
+						bool isFound = false;
+						bool keepEntry = true;
+						while (manufacturingInventoryIn >> date >> stock >> part) {
+							if (srch == part) {
+								isFound = true;
+								cout << "New Stock ";
+								cin >> stock;
+
+								if (stoi(stock) == 0) {
+									string userDelResponse;
+									cout << "Would you like to delete this item form the database? (Yes, y)" << endl;
+									cin >> userDelResponse;
+
+									if (userDelResponse == "Yes" || userDelResponse == "Y" || userDelResponse == "yes" || userDelResponse == "y") {
+										cout << part << " deleted" << endl;
+										keepEntry = false;
+									}
+								}
+							}
+							if (keepEntry) {
+								cout << setw(20) << date << setw(20) << stock << setw(20) << part << endl << endl << endl;
+							} else {
+								keepEntry = true;
+							}
+						}
+						if (!isFound) {
+							cout << "Item could not be found!" << endl;
+						}
+					}
+
+					tempOut.close();
+					manufacturingInventoryIn.close();
+					if (remove("manufacturing_part_database")) {
+						cout << "Error deleting file" << endl;
+					} else {
+						cout << "File successfully deleted" << endl;
+					}
+
+					if (rename("temp_file", "manufacturing_part_database")) {
+						cout << "Error renaming file" << endl;
+					} else {
+						cout << "File successfully renamed" << endl;
+					}
+				}
+			}
+		} else if (input == 2) {							// Materials submenu
+			string stock, mat, srch;
+
+			manufacturingInventoryIn.open(MAN_MAT_FILE);
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Last Updated" << setw(20) << "Stock" << setw(20) << "Materials" << endl;
+				while (manufacturingInventoryIn >> date >> stock >> mat) {
+					cout << setw(20) << date << setw(20) << stock << setw(20) << mat << endl;
+				}
+			} else {
+				cout << "Error opening " << MAN_MAT_FILE << endl;
+			}
+			manufacturingInventoryIn.close();
+
+			while (matInput != 3) {
+				do {
+					cout << "Materials Submenu" << endl;
+					cout << "[0] Add Materials" << endl;
+					cout << "[1] Search Materials" << endl;
+					cout << "[2] Update Stock" << endl;
+					cout << "[3] Return" << endl;
+					cin >> matInput;
+					system("CLS");
+				} while (input < 0 || input > 3);
+				// Stuff
+			}
+		} else if (input == 3) {							// Suppliers submenu
+			string sup;
+			
+			while (supInput != 3) {
+				do {
+					manufacturingInventoryIn.open(MAN_SUP_FILE);
+					if (manufacturingInventoryIn.is_open()) {
+						cout << setw(20) << "Last Updated" << setw(20) << "Supplier" << endl;
+						while (manufacturingInventoryIn >> date >> sup) {
+							cout << setw(20) << date << setw(20) << sup << endl;
+						}
+					} else {
+						cout << "Error opening " << MAN_SUP_FILE << endl;
+					}
+
+					manufacturingInventoryIn.close();
+					cout << "Suppliers Submenu" << endl;
+					cout << "[0] Add Suppliers" << endl;
+					cout << "[1] Search Suppliers" << endl;
+					cout << "[2] Remove Supplier" << endl;
+					cout << "[3] Return" << endl;
+					cin >> supInput;
+					system("CLS");
+				} while (partInput < 0 || partInput > 3);
+
+				if (input == 0) {
+				}
+			}
 		}
+		
 	}
-
-
 }
 
-void Company::dealership(ifstream& dealershipInventoryIn, ofstream& dealershipInventoryOut) {
+void Company::dealership() {
 	dealershipInventoryOut.open(DEALERSHIP_FILE);
 
 	dealershipInventoryOut.close();
 }
 
-void Company::maintenace(ifstream& maintenaceInventoryIn, ofstream& maintenaceInventoryOut) {
+void Company::maintenace() {
 	maintenaceInventoryOut.open(MAINTENANCE_FILE);
 
 	maintenaceInventoryOut.close();
 }
 
 void Company::customer() {
+	string year;
+	int choice;
+	string make;
+	string model;
+	string color;
+	string ship;
+
+	//for file read
+	string itemYr;
+	string itemMk;
+	string itemMo;
+	string itemCo;
+	string itemCh;
+
+	while (true) {
+		// ask customer to choose if they want a new or used car
+		cout << "What type of condition do you want your car?" << endl;
+		cout << "[0] New" << endl;
+		cout << "[1] Used" << endl;
+		cin >> choice;
+
+
+
+		if (choice == 0) {
+			manufacturingInventoryIn.open(MAN_CAR_FILE);
+			itemCh = "New";
+
+			// get desired car from customer (year, make, model, color)
+			cout << endl << "Enter desired year: ";
+			cin >> year;
+			cout << endl << "Enter desired make: ";
+			cin >> make;
+			cout << endl << "Enter desired model: ";
+			cin >> model;
+			cout << endl << "Enter desired color: ";
+			cin >> color;
+
+			// use inputs to search for matching values and display
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << setw(20) << "Year" << endl;
+				while (manufacturingInventoryIn >> make >> model >> color >> year) {
+					if (itemMk == make && itemMo == model && itemCo == color && itemYr == year && itemCh == "New") {
+						cout << setw(20) << make << setw(20) << model << setw(20) << color << setw(20) << year << endl;
+						cout << "Would you like to get this vehicle shipped to a dealership near you?" << endl;
+						cout << "[Y] Yes" << endl;
+						cout << "[N] No" << endl;
+						cin >> ship;
+						if (ship == "Y" || ship == "y" || ship == "Yes" || "ship" == "yes") {
+							cout << "Congratulations! Your vehicle will arrive to your closest dealership in a couple of days!" << endl;
+						} else if (ship == "N" || ship == "n" || ship == "No" || ship == "no") {
+							//assuming they knew the car they wanted but dont want anymore
+							cout << "Thank you for your time." << endl;
+						} else {
+							cout << "Invalid response." << endl;
+						}
+					}
+				}
+			}
+
+			manufacturingInventoryIn.close();
+
+		} else if (choice == 1) {
+			manufacturingInventoryIn.open(MAN_CAR_FILE);
+			itemCh = "Used";
+
+			// get desired car from customer (year, make, model, color)
+			cout << endl << "Enter desired year: ";
+			cin >> year;
+			cout << endl << "Enter desired make: ";
+			cin >> make;
+			cout << endl << "Enter desired model: ";
+			cin >> model;
+			cout << endl << "Enter desired color: ";
+			cin >> color;
+
+			// use inputs to search for matching values and display
+
+			if (manufacturingInventoryIn.is_open()) {
+				cout << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Color" << setw(20) << "Year" << endl;
+				while (manufacturingInventoryIn >> make >> model >> color >> year) {
+					if (itemMk == make && itemMo == model && itemCo == color && itemYr == year && itemCh == "Used") {
+						cout << setw(20) << make << setw(20) << model << setw(20) << color << setw(20) << year << endl;
+						cout << "[Y] Yes" << endl;
+						cout << "[N] No" << endl;
+						cin >> ship;
+						if (ship == "Y" || ship == "y" || ship == "Yes" || ship == "yes") {
+							cout << "Congratulations! Your vehicle will arrive to your closest dealership in a couple of days!" << endl;
+						} else if (ship == "N" || ship == "n" || ship == "No" || ship == "no") {
+							//assuming they knew the car they wanted but dont want anymore
+							cout << "Thank you for your time." << endl;
+						} else {
+							cout << "Invalid response." << endl;
+						}
+					}
+				}
+			}
+
+			manufacturingInventoryIn.close();
+
+		} else {
+			cout << "Invalid input." << endl;
+		}
+
+
+	}
 
 }
 
 void Company::manager() {
-
+	// Grad Portion
 }
