@@ -714,7 +714,7 @@ void Company::customer() {
 
 		// use inputs to search for matching values and display
 		if (manufacturingInventoryIn.is_open()) {
-			while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color >> condition) {
+			while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color >> condition >> price) {
 				if (item_make == make && item_model == model && item_color == color && item_year == year && item_condition == condition) {
 					cout << setw(20) << "Year" << setw(20) << "Color" << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Stock" << endl;
 					cout << setw(20) << year << setw(20) << color << setw(20) << make << setw(20) << model << setw(20) << stock << endl;
@@ -748,7 +748,7 @@ void Company::customer() {
 		cin >> item_color;
 
 		if (manufacturingInventoryIn.is_open()) {
-			while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color >> condition) {
+			while (manufacturingInventoryIn >> date >> stock >> year >> make >> model >> color >> condition >> price) {
 				if (item_make == make && item_model == model && item_color == color && item_year == year && item_condition == condition) {
 					cout << setw(20) << "Year" << setw(20) << "Color" << setw(20) << "Make" << setw(20) << "Model" << setw(20) << "Stock" << endl;
 					cout << setw(20) << year << setw(20) << color << setw(20) << make << setw(20) << model << setw(20) << stock << endl;
